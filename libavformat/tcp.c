@@ -348,7 +348,7 @@ static int tcp_open(URLContext *h, const char *uri, int flags)
     const char *p;
     char buf[256];
     int ret;
-    char hostname[1024],proto[1024],path[1024];
+    char hostname[1024],proto[1024],path[4096];
     char portstr[10];
     AVAppTcpIOControl control = {0};
     DnsCacheEntry *dns_entry = NULL;
@@ -552,7 +552,7 @@ static int tcp_fast_open(URLContext *h, const char *http_request, const char *ur
     const char *p;
     char buf[256];
     int ret;
-    char hostname[1024],proto[1024],path[1024];
+    char hostname[1024],proto[1024],path[4096];
     char portstr[10];
     AVAppTcpIOControl control = {0};
     DnsCacheEntry *dns_entry = NULL;
