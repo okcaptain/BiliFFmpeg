@@ -514,6 +514,9 @@ static int http_listen(URLContext *h, const char *uri, int flags,
         lower_proto = "tls";
     ff_url_join(lower_url, sizeof(lower_url), lower_proto, NULL, hostname, port,
                 NULL);
+
+    av_log(h, AV_LOG_WARNING, "lower_url %s, lower_proto %s, hostname %s, port %d \n", lower_url, lower_proto, hostname, port);
+
     if ((ret = av_dict_set_int(options, "listen", s->listen, 0)) < 0)
         goto fail;
     if ((ret = ffurl_open_whitelist(&s->hd, lower_url, AVIO_FLAG_READ_WRITE,
@@ -1150,7 +1153,7 @@ static int http_read_header(URLContext *h, int *new_location)
         if ((err = http_get_line(s, line, sizeof(line))) < 0)
             return err;
 
-        av_log(h, AV_LOG_TRACE, "header='%s'\n", line);
+        av_log(h, AV_LOG_WARNING, "http_get_line header='%s'\n", line);
 
         err = process_line(h, line, s->line_count, new_location);
         if (err < 0)
