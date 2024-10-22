@@ -1215,6 +1215,10 @@ static int http_connect(URLContext *h, const char *path, const char *local_path,
     else
         method = post ? "POST" : "GET";
 
+
+    av_log(h, AV_LOG_WARNING, "http_connect method: %s\n", method);
+
+
     authstr      = ff_http_auth_create_response(&s->auth_state, auth,
                                                 local_path, method);
     proxyauthstr = ff_http_auth_create_response(&s->proxy_auth_state, proxyauth,
@@ -1316,6 +1320,9 @@ static int http_connect(URLContext *h, const char *path, const char *local_path,
              proxyauthstr ? "Proxy-" : "", proxyauthstr ? proxyauthstr : "");
 
     av_log(h, AV_LOG_WARNING, "request: %s\n", s->buffer);
+    av_log(h, AV_LOG_WARNING, "request buffer len: %d\n", strlen(s->buffer));
+    av_log(h, AV_LOG_WARNING, "headers: %s\n", headers);
+    av_log(h, AV_LOG_WARNING, "headers len: %d\n", strlen(headers));
 
     if (strlen(headers) + 1 == sizeof(headers) ||
         ret >= sizeof(s->buffer)) {
