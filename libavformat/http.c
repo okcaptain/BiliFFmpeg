@@ -1817,7 +1817,7 @@ static int http_proxy_open(URLContext *h, const char *uri, int flags)
 {
     HTTPContext *s = h->priv_data;
     char hostname[1024], hoststr[1024];
-    char auth[1024], pathbuf[1024], *path;
+    char auth[1024], pathbuf[4096], *path;
     char lower_url[100];
     int port, ret = 0, attempts = 0;
     HTTPAuthType cur_auth_type;
