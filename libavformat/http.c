@@ -1313,7 +1313,7 @@ static int http_connect(URLContext *h, const char *path, const char *local_path,
              "%s%s"
              "\r\n",
              method,
-             path,
+             s->location,
              post && s->chunked_post ? "Transfer-Encoding: chunked\r\n" : "",
              headers,
              authstr ? authstr : "",
