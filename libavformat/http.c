@@ -253,6 +253,10 @@ static int http_open_cnx_internal(URLContext *h, AVDictionary **options)
     av_strlcpy(prev_location, s->location, sizeof(prev_location));
     err = http_connect(h, path, local_path, hoststr,
                        auth, proxyauth, &location_changed);
+
+    av_log(h, AV_LOG_WARNING, "http_connect location: %s\n", s->location);
+    av_log(h, AV_LOG_WARNING, "http_connect  path: %s, local_path: %s ----\n", path, local_path);
+
     if (err < 0)
         return err;
 
@@ -452,7 +456,7 @@ static int http_write_reply(URLContext* h, int status_code)
                  content_type,
                  s->headers ? s->headers : "");
     }
-    av_log(h, AV_LOG_TRACE, "HTTP reply header: \n%s----\n", message);
+    av_log(h, AV_LOG_WARNING, "HTTP reply header: \n%s----\n", message);
     if ((ret = ffurl_write(s->hd, message, message_len)) < 0)
         return ret;
     return 0;
@@ -471,7 +475,7 @@ static int http_handshake(URLContext *c)
     URLContext *cl = ch->hd;
     switch (ch->handshake_step) {
     case LOWER_PROTO:
-        av_log(c, AV_LOG_TRACE, "Lower protocol\n");
+        av_log(c, AV_LOG_WARNING, "Lower protocol\n");
         if ((ret = ffurl_handshake(cl)) > 0)
             return 2 + ret;
         if (ret < 0)
@@ -480,7 +484,7 @@ static int http_handshake(URLContext *c)
         ch->is_connected_server = 1;
         return 2;
     case READ_HEADERS:
-        av_log(c, AV_LOG_TRACE, "Read headers\n");
+        av_log(c, AV_LOG_WARNING, "Read headers\n");
         if ((err = http_read_header(c, &new_location)) < 0) {
             handle_http_errors(c, err);
             return err;
@@ -488,7 +492,7 @@ static int http_handshake(URLContext *c)
         ch->handshake_step = WRITE_REPLY_HEADERS;
         return 1;
     case WRITE_REPLY_HEADERS:
-        av_log(c, AV_LOG_TRACE, "Reply code: %d\n", ch->reply_code);
+        av_log(c, AV_LOG_WARNING, "Reply code: %d\n", ch->reply_code);
         if ((err = http_write_reply(c, ch->reply_code)) < 0)
             return err;
         ch->handshake_step = FINISH;
@@ -911,7 +915,7 @@ static int process_line(URLContext *h, char *line, int line_count,
             while (*p && !av_isspace(*p))
                 p++;
             *(p++) = '\0';
-            av_log(h, AV_LOG_TRACE, "Received method: %s\n", method);
+            av_log(h, AV_LOG_WARNING, "Received method: %s\n", method);
             if (s->method) {
                 if (av_strcasecmp(s->method, method)) {
                     av_log(h, AV_LOG_ERROR, "Received and expected HTTP method do not match. (%s expected, %s received)\n",
@@ -920,7 +924,7 @@ static int process_line(URLContext *h, char *line, int line_count,
                 }
             } else {
                 // use autodetected HTTP method to expect
-                av_log(h, AV_LOG_TRACE, "Autodetected %s HTTP method\n", auto_method);
+                av_log(h, AV_LOG_WARNING, "Autodetected %s HTTP method\n", auto_method);
                 if (av_strcasecmp(auto_method, method)) {
                     av_log(h, AV_LOG_ERROR, "Received and autodetected HTTP method did not match "
                            "(%s autodetected %s received)\n", auto_method, method);
@@ -937,7 +941,7 @@ static int process_line(URLContext *h, char *line, int line_count,
             while (!av_isspace(*p))
                 p++;
             *(p++) = '\0';
-            av_log(h, AV_LOG_TRACE, "Requested resource: %s\n", resource);
+            av_log(h, AV_LOG_WARNING, "Requested resource: %s\n", resource);
             if (!(s->resource = av_strdup(resource)))
                 return AVERROR(ENOMEM);
 
@@ -952,7 +956,7 @@ static int process_line(URLContext *h, char *line, int line_count,
                 av_log(h, AV_LOG_ERROR, "Malformed HTTP version string.\n");
                 return ff_http_averror(400, AVERROR(EIO));
             }
-            av_log(h, AV_LOG_TRACE, "HTTP version string: %s\n", version);
+            av_log(h, AV_LOG_WARNING, "HTTP version string: %s\n", version);
         } else {
             if (av_strncasecmp(p, "HTTP/1.0", 8) == 0)
                 s->willclose = 1;
@@ -968,7 +972,7 @@ static int process_line(URLContext *h, char *line, int line_count,
                 p++;
             s->http_code = strtol(p, &end, 10);
 
-            av_log(h, AV_LOG_TRACE, "http_code=%d\n", s->http_code);
+            av_log(h, AV_LOG_WARNING, "http_code=%d\n", s->http_code);
 
             if ((ret = check_http_code(h, s->http_code, end)) < 0)
                 return ret;
@@ -1303,7 +1307,7 @@ static int http_connect(URLContext *h, const char *path, const char *local_path,
              authstr ? authstr : "",
              proxyauthstr ? "Proxy-" : "", proxyauthstr ? proxyauthstr : "");
 
-    av_log(h, AV_LOG_DEBUG, "request: %s\n", s->buffer);
+    av_log(h, AV_LOG_WARNING, "request: %s\n", s->buffer);
 
     if (strlen(headers) + 1 == sizeof(headers) ||
         ret >= sizeof(s->buffer)) {
@@ -1386,7 +1390,7 @@ static int http_buf_read(URLContext *h, uint8_t *buf, int size)
 
             s->chunksize = strtoull(line, NULL, 16);
 
-            av_log(h, AV_LOG_TRACE,
+            av_log(h, AV_LOG_WARNING,
                    "Chunked encoding data size: %"PRIu64"\n",
                     s->chunksize);
 
