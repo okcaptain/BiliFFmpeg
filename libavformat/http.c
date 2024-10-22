@@ -250,12 +250,20 @@ static int http_open_cnx_internal(URLContext *h, AVDictionary **options)
             return err;
     }
 
+
+    av_log(h, AV_LOG_WARNING, "http_open_cnx_internal hoststr: %s\n", hoststr);
+    av_log(h, AV_LOG_WARNING, "http_open_cnx_internal hoststr len: %d\n", strlen(hoststr));
+    av_log(h, AV_LOG_WARNING, "http_connect location: %s\n", s->location);
+    av_log(h, AV_LOG_WARNING, "http_connect location len: %d\n", strlen(s->location));
+    av_log(h, AV_LOG_WARNING, "http_connect  path: %s----\n", path);
+    av_log(h, AV_LOG_WARNING, "http_connect path len: %d\n", strlen(path));
+    av_log(h, AV_LOG_WARNING, "http_connect  local_path: %s ----\n", local_path);
+    av_log(h, AV_LOG_WARNING, "http_connect local_path len: %d\n", strlen(local_path));
+
     av_strlcpy(prev_location, s->location, sizeof(prev_location));
     err = http_connect(h, path, local_path, hoststr,
                        auth, proxyauth, &location_changed);
 
-    av_log(h, AV_LOG_WARNING, "http_connect location: %s\n", s->location);
-    av_log(h, AV_LOG_WARNING, "http_connect  path: %s, local_path: %s ----\n", path, local_path);
 
     if (err < 0)
         return err;
