@@ -4805,8 +4805,8 @@ void av_url_split(char *proto, int proto_size,
     /* separate path from hostname */
     ls = p + strcspn(p, "/?#");
     if (strncmp(ls, "/", 1) != 0) {
-        char path1[MAX_URL_SIZE]
-        sprintf(path1, "%s%s", "/", ls)
+        char path1[MAX_URL_SIZE];
+        sprintf(path1, "%s%s", "/", ls);
         av_strlcpy(path, path1, path_size);
     } else {
         av_strlcpy(path, ls, path_size);
