@@ -77,6 +77,7 @@ extern AVOutputFormat ff_avm2_muxer;
 extern AVInputFormat  ff_avr_demuxer;
 extern AVInputFormat  ff_avs_demuxer;
 extern AVInputFormat  ff_avs3_demuxer;
+extern AVOutputFormat ff_avs3_muxer;
 extern AVInputFormat  ff_bethsoftvid_demuxer;
 extern AVInputFormat  ff_bfi_demuxer;
 extern AVInputFormat  ff_bintext_demuxer;
