@@ -172,10 +172,10 @@ static int avs3_parse(AVCodecParserContext *s, AVCodecContext *avctx,
     return next;
 }
 
-const AVCodecParser ff_avs3_parser = {
-    .codec_ids      = { AV_CODEC_ID_AVS3 },
-    .priv_data_size = sizeof(ParseContext),
-    .parser_parse   = avs3_parse,
-    .parser_close   = ff_parse_close,
-    .split          = ff_mpeg4video_split,
+AVCodecParser ff_avs3_parser = {
+        .codec_ids      = { AV_CODEC_ID_AVS3 },
+        .priv_data_size = sizeof(ParseContext),
+        .parser_parse   = avs3_parse,
+        .parser_close   = ff_parse_close,
+        .split          = ff_mpeg4video_split,
 };
