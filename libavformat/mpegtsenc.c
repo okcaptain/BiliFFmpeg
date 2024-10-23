@@ -340,6 +340,9 @@ static int mpegts_write_pmt(AVFormatContext *s, MpegTSService *service)
         case AV_CODEC_ID_CAVS:
             stream_type = STREAM_TYPE_VIDEO_CAVS;
             break;
+        case AV_CODEC_ID_AVS3:
+            stream_type = STREAM_TYPE_VIDEO_AVS3;
+            break;
         case AV_CODEC_ID_DIRAC:
             stream_type = STREAM_TYPE_VIDEO_DIRAC;
             break;
