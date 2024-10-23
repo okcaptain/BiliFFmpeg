@@ -25,6 +25,8 @@
 #include "libavcodec/internal.h"
 #include "avformat.h"
 #include "rawdec.h"
+#include "libavutil/avassert.h"
+#include "libavutil/intreadwrite.h"
 
 const uint8_t *avpriv_find_start_code(const uint8_t *av_restrict p,
                                       const uint8_t *end,
