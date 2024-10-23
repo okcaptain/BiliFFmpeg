@@ -25,41 +25,8 @@
 #include "libavcodec/internal.h"
 #include "avformat.h"
 #include "rawdec.h"
-#include "libavutil/avassert.h"
-#include "libavutil/intreadwrite.h"
+#include "utils.c"
 
-const uint8_t *avpriv_find_start_code(const uint8_t *av_restrict p,
-                                      const uint8_t *end,
-                                      uint32_t *av_restrict state)
-{
-    int i;
-
-    av_assert0(p <= end);
-    if (p >= end)
-        return end;
-
-    for (i = 0; i < 3; i++) {
-        uint32_t tmp = *state << 8;
-        *state = tmp + *(p++);
-        if (tmp == 0x100 || p == end)
-            return p;
-    }
-
-    while (p < end) {
-        if      (p[-1] > 1      ) p += 3;
-        else if (p[-2]          ) p += 2;
-        else if (p[-3]|(p[-1]-1)) p++;
-        else {
-            p++;
-            break;
-        }
-    }
-
-    p = FFMIN(p, end) - 4;
-    *state = AV_RB32(p);
-
-    return p + 4;
-}
 
 static int avs3video_probe(const AVProbeData *p)
 {
