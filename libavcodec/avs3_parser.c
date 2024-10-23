@@ -177,4 +177,5 @@ const AVCodecParser ff_avs3_parser = {
         .priv_data_size = sizeof(ParseContext),
         .parser_parse   = avs3_parse,
         .parser_close   = ff_parse_close,
+        .split          = ff_mpeg4video_split,
 };
