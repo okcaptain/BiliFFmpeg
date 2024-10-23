@@ -21,12 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "libavcodec/avs3.h"
-#include "libavcodec/internal.h"
 #include "avformat.h"
 #include "rawdec.h"
-#include "utils.c"
 
+#include "libavcodec/avs3.h"
+#include "libavcodec/internal.h"
 
 static int avs3video_probe(const AVProbeData *p)
 {
