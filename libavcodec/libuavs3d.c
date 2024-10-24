@@ -1,5 +1,5 @@
 /*
- * AVS3-P2/IEEE1857.10 video decoder (using the uavs3d library)
+ * RAW AVS3-P2/IEEE1857.10 video demuxer
  * Copyright (c) 2020 Zhenyu Wang <wangzhenyu@pkusz.edu.cn>
  *                    Bingjie Han <hanbj@pkusz.edu.cn>
  *                    Huiwen Ren  <hwrenx@gmail.com>
@@ -21,16 +21,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "libavutil/avassert.h"
 #include "libavutil/avutil.h"
 #include "libavutil/common.h"
-#include "libavutil/cpu.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/intreadwrite.h"
 #include "libavutil/opt.h"
 #include "avcodec.h"
 #include "avs3.h"
 #include "internal.h"
-#include "uavs3d.h
+#include "uavs3d.h"
 
 typedef struct uavs3d_context {
     AVCodecContext  *avctx;
@@ -48,11 +48,11 @@ static int uavs3d_find_next_start_code(const unsigned char *bs_data, int bs_len,
     int count = bs_len - 4;
 
     while (count >= 4 &&
-           UAVS3D_CHECK_START_CODE(data_ptr, AVS3_INTER_PIC_START_CODE) &&
-           UAVS3D_CHECK_START_CODE(data_ptr, AVS3_INTRA_PIC_START_CODE) &&
-           UAVS3D_CHECK_START_CODE(data_ptr, AVS3_SEQ_START_CODE) &&
-           UAVS3D_CHECK_START_CODE(data_ptr, AVS3_FIRST_SLICE_START_CODE) &&
-           UAVS3D_CHECK_START_CODE(data_ptr, AVS3_SEQ_END_CODE)) {
+    UAVS3D_CHECK_START_CODE(data_ptr, AVS3_INTER_PIC_START_CODE) &&
+    UAVS3D_CHECK_START_CODE(data_ptr, AVS3_INTRA_PIC_START_CODE) &&
+    UAVS3D_CHECK_START_CODE(data_ptr, AVS3_SEQ_START_CODE) &&
+    UAVS3D_CHECK_START_CODE(data_ptr, AVS3_FIRST_SLICE_START_CODE) &&
+    UAVS3D_CHECK_START_CODE(data_ptr, AVS3_SEQ_END_CODE)) {
         data_ptr++;
         count--;
     }
@@ -78,22 +78,17 @@ static void uavs3d_output_callback(uavs3d_io_frm_t *dec_frame) {
 
     frm->pts       = dec_frame->pts;
     frm->pkt_dts   = dec_frame->dts;
-#if FF_API_FRAME_PKT
-FF_DISABLE_DEPRECATION_WARNINGS
     frm->pkt_pos   = dec_frame->pkt_pos;
     frm->pkt_size  = dec_frame->pkt_size;
-FF_ENABLE_DEPRECATION_WARNINGS
-#endif
+    frm->coded_picture_number   = dec_frame->dtr;
+    frm->display_picture_number = dec_frame->ptr;
 
-    if (dec_frame->type < 0 || dec_frame->type >= FF_ARRAY_ELEMS(ff_avs3_image_type)) {
+    if (dec_frame->type < 0 || dec_frame->type >= 4) {
         av_log(NULL, AV_LOG_WARNING, "Error frame type in uavs3d: %d.\n", dec_frame->type);
-    } else {
-        frm->pict_type = ff_avs3_image_type[dec_frame->type];
-        if (frm->pict_type == AV_PICTURE_TYPE_I)
-            frm->flags |= AV_FRAME_FLAG_KEY;
-        else
-            frm->flags &= ~AV_FRAME_FLAG_KEY;
     }
+
+    frm->pict_type = ff_avs3_image_type[dec_frame->type];
+    frm->key_frame = (frm->pict_type == AV_PICTURE_TYPE_I);
 
     for (i = 0; i < 3; i++) {
         frm_out.width [i] = dec_frame->width[i];
@@ -146,14 +141,14 @@ static void libuavs3d_flush(AVCodecContext * avctx)
 }
 
 #define UAVS3D_CHECK_INVALID_RANGE(v, l, r) ((v)<(l)||(v)>(r))
-static int libuavs3d_decode_frame(AVCodecContext *avctx, AVFrame *frm,
-                                  int *got_frame, AVPacket *avpkt)
+static int libuavs3d_decode_frame(AVCodecContext *avctx, void *data, int *got_frame, AVPacket *avpkt)
 {
     uavs3d_context *h = avctx->priv_data;
     const uint8_t *buf = avpkt->data;
     int buf_size = avpkt->size;
     const uint8_t *buf_end;
-    const uint8_t *buf_ptr = buf;
+    const uint8_t *buf_ptr;
+    AVFrame *frm = data;
     int left_bytes;
     int ret, finish = 0;
 
@@ -166,7 +161,7 @@ static int libuavs3d_decode_frame(AVCodecContext *avctx, AVFrame *frm,
             if (!frm->data[0] && (ret = ff_get_buffer(avctx, frm, 0)) < 0) {
                 return ret;
             }
-            h->dec_frame.priv = frm;   // AVFrame
+            h->dec_frame.priv = data;   // AVFrame
         }
         do {
             ret = uavs3d_flush(h->dec_handle, &h->dec_frame);
@@ -174,13 +169,10 @@ static int libuavs3d_decode_frame(AVCodecContext *avctx, AVFrame *frm,
     } else {
         uavs3d_io_frm_t *frm_dec = &h->dec_frame;
 
+        buf_ptr = buf;
         buf_end = buf + buf_size;
-#if FF_API_FRAME_PKT
-FF_DISABLE_DEPRECATION_WARNINGS
         frm_dec->pkt_pos  = avpkt->pos;
         frm_dec->pkt_size = avpkt->size;
-FF_ENABLE_DEPRECATION_WARNINGS
-#endif
 
         while (!finish) {
             int bs_len;
@@ -189,7 +181,7 @@ FF_ENABLE_DEPRECATION_WARNINGS
                 if (!frm->data[0] && (ret = ff_get_buffer(avctx, frm, 0)) < 0) {
                     return ret;
                 }
-                h->dec_frame.priv = frm;   // AVFrame
+                h->dec_frame.priv = data;   // AVFrame
             }
 
             if (uavs3d_find_next_start_code(buf_ptr, buf_end - buf_ptr, &left_bytes)) {
@@ -214,7 +206,7 @@ FF_ENABLE_DEPRECATION_WARNINGS
                     avctx->framerate.num = ff_avs3_frame_rate_tab[seqh->frame_rate_code].num;
                     avctx->framerate.den = ff_avs3_frame_rate_tab[seqh->frame_rate_code].den;
                 }
-                avctx->has_b_frames = seqh->output_reorder_delay;
+                avctx->has_b_frames  = !seqh->low_delay;
                 avctx->pix_fmt = seqh->bit_depth_internal == 8 ? AV_PIX_FMT_YUV420P : AV_PIX_FMT_YUV420P10LE;
                 ret = ff_set_dimensions(avctx, seqh->horizontal_size, seqh->vertical_size);
                 if (ret < 0)
