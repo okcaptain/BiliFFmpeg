@@ -21,9 +21,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "libavutil/avassert.h"
 #include "libavutil/avutil.h"
 #include "libavutil/common.h"
+#include "libavutil/cpu.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/intreadwrite.h"
 #include "libavutil/opt.h"
@@ -263,7 +263,8 @@ AVCodec ff_libuavs3d_decoder = {
         .init           = libuavs3d_init,
         .close          = libuavs3d_end,
         .decode         = libuavs3d_decode_frame,
-        .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_AUTO_THREADS,
+        .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_OTHER_THREADS,
+        .caps_internal  = FF_CODEC_CAP_AUTO_THREADS,
         .flush          = libuavs3d_flush,
         .pix_fmts       = (const enum AVPixelFormat[]) { AV_PIX_FMT_YUV420P,
                                                          AV_PIX_FMT_YUV420P10LE,

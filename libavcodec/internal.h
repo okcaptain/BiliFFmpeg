@@ -68,6 +68,20 @@
  * Codec initializes slice-based threading with a main function
  */
 #define FF_CODEC_CAP_SLICE_THREAD_HAS_MF    (1 << 5)
+/*
+ * The codec supports frame threading and has inter-frame dependencies, so it
+ * uses ff_thread_report/await_progress().
+ */
+#define FF_CODEC_CAP_ALLOCATE_PROGRESS      (1 << 6)
+/**
+ * Codec handles avctx->thread_count == 0 (auto) internally.
+ */
+#define FF_CODEC_CAP_AUTO_THREADS           (1 << 7)
+/**
+ * Codec handles output frame properties internally instead of letting the
+ * internal logic derive them from AVCodecInternal.last_pkt_props.
+ */
+#define FF_CODEC_CAP_SETS_FRAME_PROPS       (1 << 8)
 
 #ifdef TRACE
 #   define ff_tlog(ctx, ...) av_log(ctx, AV_LOG_TRACE, __VA_ARGS__)
