@@ -21,17 +21,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include "libavutil/avassert.h"
 #include "libavutil/avutil.h"
 #include "libavutil/common.h"
-#include "libavutil/cpu.h"
 #include "libavutil/imgutils.h"
 #include "libavutil/intreadwrite.h"
 #include "libavutil/opt.h"
 #include "avcodec.h"
 #include "avs3.h"
-#include "codec_internal.h"
-#include "decode.h"
-#include "uavs3d.h"
+#include "internal.h"
+#include "uavs3d.h
 
 typedef struct uavs3d_context {
     AVCodecContext  *avctx;
@@ -255,18 +254,19 @@ FF_ENABLE_DEPRECATION_WARNINGS
     return buf_ptr - buf;
 }
 
-const FFCodec ff_libuavs3d_decoder = {
-    .p.name         = "libuavs3d",
-    CODEC_LONG_NAME("libuavs3d AVS3-P2/IEEE1857.10"),
-    .p.type         = AVMEDIA_TYPE_VIDEO,
-    .p.id           = AV_CODEC_ID_AVS3,
-    .priv_data_size = sizeof(uavs3d_context),
-    .init           = libuavs3d_init,
-    .close          = libuavs3d_end,
-    FF_CODEC_DECODE_CB(libuavs3d_decode_frame),
-    .p.capabilities = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_OTHER_THREADS,
-    .caps_internal  = FF_CODEC_CAP_NOT_INIT_THREADSAFE |
-                      FF_CODEC_CAP_AUTO_THREADS,
-    .flush          = libuavs3d_flush,
-    .p.wrapper_name = "libuavs3d",
+AVCodec ff_libuavs3d_decoder = {
+        .name           = "libuavs3d",
+        .long_name      = NULL_IF_CONFIG_SMALL("libuavs3d AVS3-P2/IEEE1857.10"),
+        .type           = AVMEDIA_TYPE_VIDEO,
+        .id             = AV_CODEC_ID_AVS3,
+        .priv_data_size = sizeof(uavs3d_context),
+        .init           = libuavs3d_init,
+        .close          = libuavs3d_end,
+        .decode         = libuavs3d_decode_frame,
+        .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_AUTO_THREADS,
+        .flush          = libuavs3d_flush,
+        .pix_fmts       = (const enum AVPixelFormat[]) { AV_PIX_FMT_YUV420P,
+                                                         AV_PIX_FMT_YUV420P10LE,
+                                                         AV_PIX_FMT_NONE },
+        .wrapper_name   = "libuavs3d",
 };
