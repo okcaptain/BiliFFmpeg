@@ -690,6 +690,7 @@ extern AVCodec ff_libspeex_encoder;
 extern AVCodec ff_libspeex_decoder;
 extern AVCodec ff_libtheora_encoder;
 extern AVCodec ff_libtwolame_encoder;
+extern AVCodec ff_libuavs3d_decoder;
 extern AVCodec ff_libvo_amrwbenc_encoder;
 extern AVCodec ff_libvorbis_encoder;
 extern AVCodec ff_libvorbis_decoder;
