@@ -86,10 +86,7 @@ static void uavs3d_output_callback(uavs3d_io_frm_t *dec_frame) {
         av_log(NULL, AV_LOG_WARNING, "Error frame type in uavs3d: %d.\n", dec_frame->type);
     } else {
         frm->pict_type = ff_avs3_image_type[dec_frame->type];
-        if (frm->pict_type == AV_PICTURE_TYPE_I)
-            frm->flags |= AV_FRAME_FLAG_KEY;
-        else
-            frm->flags &= ~AV_FRAME_FLAG_KEY;
+        frm->key_frame = (frm->pict_type == AV_PICTURE_TYPE_I);
     }
 
     for (i = 0; i < 3; i++) {
