@@ -130,6 +130,10 @@
 #define FF_API_PSEUDOPAL                (LIBAVUTIL_VERSION_MAJOR < 57)
 #endif
 
+#ifndef FF_API_FRAME_PKT
+#define FF_API_FRAME_PKT                (LIBAVUTIL_VERSION_MAJOR < 57)
+#endif
+
 
 /**
  * @}
