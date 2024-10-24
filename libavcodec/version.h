@@ -132,6 +132,8 @@
 #ifndef FF_API_NEXT
 #define FF_API_NEXT              (LIBAVCODEC_VERSION_MAJOR < 59)
 #endif
-
+#ifndef FF_API_AUTO_THREADS
+#define FF_API_AUTO_THREADS        (LIBAVCODEC_VERSION_MAJOR < 59)
+#endif
 
 #endif /* AVCODEC_VERSION_H */
