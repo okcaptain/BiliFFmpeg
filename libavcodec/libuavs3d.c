@@ -21,7 +21,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "libavutil/avassert.h"
 #include "libavutil/avutil.h"
 #include "libavutil/common.h"
 #include "libavutil/imgutils.h"
@@ -87,11 +86,11 @@ static void uavs3d_output_callback(uavs3d_io_frm_t *dec_frame) {
         av_log(NULL, AV_LOG_WARNING, "Error frame type in uavs3d: %d.\n", dec_frame->type);
     } else {
         frm->pict_type = ff_avs3_image_type[dec_frame->type];
-        frm->key_frame = (frm->pict_type == AV_PICTURE_TYPE_I);
+        if (frm->pict_type == AV_PICTURE_TYPE_I)
+            frm->flags |= AV_FRAME_FLAG_KEY;
+        else
+            frm->flags &= ~AV_FRAME_FLAG_KEY;
     }
-
-    frm->pict_type = ff_avs3_image_type[dec_frame->type];
-    frm->key_frame = (frm->pict_type == AV_PICTURE_TYPE_I);
 
     for (i = 0; i < 3; i++) {
         frm_out.width [i] = dec_frame->width[i];
@@ -260,8 +259,5 @@ AVCodec ff_libuavs3d_decoder = {
         .capabilities   = AV_CODEC_CAP_DR1 | AV_CODEC_CAP_DELAY | AV_CODEC_CAP_OTHER_THREADS,
         .caps_internal  = FF_CODEC_CAP_AUTO_THREADS,
         .flush          = libuavs3d_flush,
-        .pix_fmts       = (const enum AVPixelFormat[]) { AV_PIX_FMT_YUV420P,
-                                                         AV_PIX_FMT_YUV420P10LE,
-                                                         AV_PIX_FMT_NONE },
         .wrapper_name   = "libuavs3d",
 };
